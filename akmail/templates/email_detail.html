@@ -1,0 +1,192 @@
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Detail</title>
+          <!-- Boxicons CDN Link -->
+          <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+          <link rel="icon" href="{% static 'images/icon.jpg' %}">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+        <style>
+
+    body {
+    padding-left: 45px;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+.top-icons {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+    background-color: #f8f6f6;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.icon-form {
+    display: inline-block;
+    margin: 0 15px;
+}
+
+.icon-form button {
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.icon-form button:hover {
+    color: #1abc9c;
+}
+
+.content {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    padding: 20px;
+    transition: margin-left 0.5s;
+}
+
+.email-detail {
+    animation: fadeIn 1s ease-in-out;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.sent-at {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 0.9em;
+    color: #888;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.attachments ul {
+            list-style: none; /* Remove bullets */
+            padding-left: 0; /* Remove padding */
+        }
+
+        .attachments li {
+            margin-bottom: 10px; /* Space between list items */
+            display: flex;
+            justify-content: center; /* Center items horizontally */
+        }
+
+        .attachments a {
+            text-decoration: none; /* Remove underline from links */
+        }
+        </style>
+</head>
+<body style="padding-left: 45px;">
+    <div class="sidebar open">
+        {% include 'menu.html' %}
+    </div>
+    
+    <div class="content">
+        <div class="email-detail">
+            <p class="sent-at"><strong>Sent At:</strong> {{ email.sent_at|date:"F j, Y, g:i a" }}</p><br>
+            <div class="top-icons" style="height: 50px; align-items: center;">
+                <form action="{% url 'toggle_star' email.id %}" method="post" class="icon-form" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" title="Starred" style="background:none;border:none;">
+                        {% if email.is_starred %}
+                            <i class='bx bxs-star' id="star-icon"></i>
+                        {% else %}
+                            <i class='bx bx-star' id="star-icon"></i>
+                        {% endif %}
+                    </button>
+                </form>
+                <form action="{% url 'move_email' email.id %}" method="post" class="icon-form" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="folder" value="drafts">
+                    <button type="submit" title="Drafts" style="background:none;border:none;">
+                        <i class="fas fa-file-alt" id="drafts-icon"></i>
+                    </button>
+                </form>
+                <form action="{% url 'move_email' email.id %}" method="post" class="icon-form" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="folder" value="important">
+                    <button type="submit" title="Important" style="background:none;border:none;">
+                        <i class="fas fa-exclamation-circle" id="important-icon"></i>
+                    </button>
+                </form>
+                <form action="{% url 'move_email' email.id %}" method="post" class="icon-form" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="folder" value="bin">
+                    <button type="submit" title="Bin" style="background:none;border:none;">
+                        <i class="fas fa-trash" id="bin-icon"></i>
+                    </button>
+                </form>
+            </div>
+            <h1>Email Detail</h1><br>
+            <p><strong>To:</strong> {{ email.receiver_email }}</p><br>
+            <p><strong>Subject:</strong> {{ email.subject }}</p><br>
+            <p><strong>Message:</strong> {{ email.message }}</p><br>
+            {% if attachments %}
+                <div class="attachments">
+                    <h2>Attachments:</h2>
+                    <ul>
+                        {% for attachment in attachments %}
+                            {% if attachment.file.name|lower|endswith:".jpg" or attachment.file.name|lower|endswith:".jpeg" or attachment.file.name|lower|endswith:".png" or attachment.file.name|lower|endswith:".gif" %}
+                                <li style=" text-decoration: none;"><img src="{{ attachment.file.url }}" alt="{{ attachment.file.name }}" style="max-width: 40%; height: auto; border-radius: 20px;"></li>
+                            {% else %}
+                                <li style=" text-decoration: none;"><a href="{{ attachment.file.url }}" download>{{ attachment.file.name }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        let sidebar = document.querySelector(".sidebar");
+        let closeBtn = document.querySelector("#btn");
+        let searchBtn = document.querySelector(".bx-search");
+    
+        closeBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
+            menuBtnChange(); // Calling the function (optional)
+        });
+    
+        searchBtn.addEventListener("click", () => {
+            // Sidebar open when you click on the search icon
+            sidebar.classList.toggle("open");
+            menuBtnChange(); // Calling the function (optional)
+        });
+    
+        // Following are the code to change sidebar button (optional)
+        function menuBtnChange() {
+            if (sidebar.classList.contains("open")) {
+                closeBtn.classList.replace("bx-menu", "bx-menu-alt-right"); // Replacing the icons class
+            } else {
+                closeBtn.classList.replace("bx-menu-alt-right", "bx-menu"); // Replacing the icons class
+            }
+        }
+    
+        // Set the correct icon when the page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            menuBtnChange();
+        });
+    </script>
+</body>
+</html>
+{% endblock content %}

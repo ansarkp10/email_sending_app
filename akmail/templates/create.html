@@ -1,0 +1,226 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Send Email</title>
+      <!-- Boxicons CDN Link -->
+      <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+      <link rel="icon" href="{% static 'images/icon.jpg' %}">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <style>
+
+/* Container Animation */
+.animated-container {
+    animation: fadeIn 1.5s ease-in-out;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+/* Header Animation */
+.animated-header {
+    animation: bounceIn 1.5s ease-in-out;
+    font-size: 2.5em;
+    color: rgb(88, 87, 87);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Form Animation */
+.animated-form {
+    animation: zoomIn 1.5s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.animated-form .form-group {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+/* Input Field Animation */
+.animated-form input, 
+.animated-form select, 
+.animated-form textarea {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.animated-form input:focus, 
+.animated-form select:focus, 
+.animated-form textarea:focus {
+    border-color: #1abc9c;
+    box-shadow: 0 0 8px rgba(26, 188, 156, 0.6);
+}
+
+.animated-form .message-textarea {
+    height: 500px; 
+    width: 100%;  
+}
+
+/* Button Group Animation */
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+/* Button Animation */
+.animated-button {
+    padding: 15px 30px;
+    background-color: aqua;
+    border: none;
+    border-radius: 5px;
+    color: black;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    margin: 10px;
+    flex: 1;
+}
+
+.animated-button.cancel-button {
+    background-color: #e74c3c;
+}
+
+.animated-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.animated-button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes zoomIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+    </style>
+
+</head>
+<body style="padding-left: 45px;">
+  <div class="sidebar open">
+    {% include 'menu.html' %}
+</div>
+<div class="animated-container">
+    <h1 class="animated-header">Send Email</h1>
+    <form id="emailForm" name="emailForm" method="post" class="animated-form" enctype="multipart/form-data">
+      <div class="form-group">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+      </div>
+      <div class="button-group">
+        <button type="submit" class="animated-button">Send</button>
+        <button type="button" class="animated-button cancel-button" onclick="window.location.href='{% url 'index' %}'">Cancel</button>
+      </div>
+    </form>
+  </div>
+  
+  <script>
+  document.getElementById('attachmentInput').addEventListener('change', function() {
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = '';
+    for (let i = 0; i < this.files.length; i++) {
+      const hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+      hiddenInput.name = 'attachments';
+      hiddenInput.value = this.files[i].name; // For demonstration; adjust as needed
+      fileList.appendChild(hiddenInput);
+    }
+  });
+  </script>
+  
+
+
+
+    <script>
+        let sidebar = document.querySelector(".sidebar");
+        let closeBtn = document.querySelector("#btn");
+        let searchBtn = document.querySelector(".bx-search");
+    
+        closeBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
+            menuBtnChange(); // Calling the function (optional)
+        });
+    
+        searchBtn.addEventListener("click", () => {
+            // Sidebar open when you click on the search icon
+            sidebar.classList.toggle("open");
+            menuBtnChange(); // Calling the function (optional)
+        });
+    
+        // Following are the code to change sidebar button (optional)
+        function menuBtnChange() {
+            if (sidebar.classList.contains("open")) {
+                closeBtn.classList.replace("bx-menu", "bx-menu-alt-right"); // Replacing the icons class
+            } else {
+                closeBtn.classList.replace("bx-menu-alt-right", "bx-menu"); // Replacing the icons class
+            }
+        }
+    
+        // Set the correct icon when the page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            menuBtnChange();
+        });
+    </script>
+        <script>
+          function validateForm() {
+              var title = document.forms["emailForm"]["title"].value;
+              var receiverEmail = document.forms["emailForm"]["receiver_email"].value;
+              var message = document.forms["emailForm"]["message"].value;
+              if (title == "" || receiverEmail == "" || message == "") {
+                  alert("Please fill out all fields.");
+                  return false;
+              } else {
+                  alert("Email sent successfully!");
+                  return true;
+              }
+          }
+      </script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+{% load static %}
+{% load tz %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'images/icon.jpg' %}">
+    <title>AKMail</title>
+  <!-- Boxicons CDN Link -->
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+  <style>
+
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: #E4E9F7;
+}
+
+h1 {
+    font-size: 2.5em;
+    color: black; /* Green color */
+    margin-bottom: 20px;
+    animation: fadeInDown 0.8s ease-in-out;
+    text-align: center;
+}
+
+/* Fade-in-down animation for heading */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* General styling for form-box */
+.form-box {
+    background-color: aliceblue;
+    padding: 10px;
+    border-radius: 10px;
+    animation: fadeInUp 0.8s ease-in-out;
+    margin: 20px;
+    max-width: 1000px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    text-align: left;
+}
+
+/* Fade-in-up animation for form-box */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* List styling */
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+/* Link styling */
+a {
+    color: black; /* Green color */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+/* Link hover effect */
+a:hover {
+    color: #30b357; /* Darker green on hover */
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .form-box {
+        padding: 20px;
+        margin-top: 40px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+}
+
+/* No emails found message */
+.no-emails {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    font-size: 16px;
+    text-align: center;
+    color: #999;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+
+/* Star icon styling */
+.bx-star, .bxs-star {
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.bxs-star {
+    color: gold;
+}
+
+
+
+/* Search form styling */
+.search-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.search-form input[type="text"] {
+    width: 85%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.search-form input[type="text"]:focus {
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    outline: none;
+}
+
+.search-form button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: black;
+    background-color: rgb(176, 173, 173);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-form button:hover {
+    background-color: grey;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+
+
+/* Recover icon styling */
+#recover-icon {
+    color: #1abc9c;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+#recover-icon:hover {
+    color: #16a085;
+}
+
+
+/* Container for inbox */
+.form-box {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+/* List items */
+.form-box ul li {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    position: relative;
+}
+
+  </style>
+</head>
+<body style="padding-left: 45px;">
+  <div class="sidebar open">
+      {% include 'menu.html' %}
+  </div>
+  <div>
+    <div class="form-box" style="background-color: white; position: relative;">
+      <h1>Inbox</h1>
+      <ul>
+          {% if emails %}
+          <form method="GET" action="{% url 'index' %}" class="search-form">
+              <input type="text" name="q" placeholder="Search emails..." value="{{ query|default_if_none:'' }}">
+              <button type="submit">Search</button>
+          </form>
+          {% for email in emails %}
+          <li style="border-bottom: 1px solid #ddd; padding: 10px 0;" onmouseover="this.style.backgroundColor='#f9f9f9';" onmouseout="this.style.backgroundColor='';">
+              {% if email.is_starred %}
+              <i class='bx bxs-star' onclick="event.preventDefault(); document.getElementById('star-form-{{ email.id }}').submit();"></i>
+              {% else %}
+              <i class='bx bx-star' onclick="event.preventDefault(); document.getElementById('star-form-{{ email.id }}').submit();"></i>
+              {% endif %}
+              <a href="{% url 'email_detail' email.id %}">
+                  {{ email.subject }}
+              </a>
+              <i class="fas fa-trash" id="bin-icon" onclick="event.preventDefault(); document.getElementById('bin-form-{{ email.id }}').submit();" style="float: right; margin-right: 20px;"></i>
+              <form id="bin-form-{{ email.id }}" action="{% url 'move_to_bin' email.id %}" method="POST" style="display: none;">
+                  {% csrf_token %}
+              </form>
+              <span style="float: right; margin-right: 10px;">
+                  {{ email.sent_at|date:"F" }} &nbsp;&nbsp; {{ email.sent_at|date:"d" }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              </span>
+  
+              <form id="star-form-{{ email.id }}" action="{% url 'toggle_star' email.id %}" method="POST" style="display: none;">
+                  {% csrf_token %}
+              </form>
+  
+          </li>
+          {% endfor %}
+          {% else %}
+          <li class="no-emails">No emails found.</li>
+          {% endif %}
+      </ul>
+
+  </div>
+
+  </div>
+  <script>
+    let sidebar = document.querySelector(".sidebar");
+    let closeBtn = document.querySelector("#btn");
+    let searchBtn = document.querySelector(".bx-search");
+
+    closeBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("open");
+        menuBtnChange(); // Calling the function (optional)
+    });
+
+    searchBtn.addEventListener("click", () => {
+        // Sidebar open when you click on the search icon
+        sidebar.classList.toggle("open");
+        menuBtnChange(); // Calling the function (optional)
+    });
+
+    // Following are the code to change sidebar button (optional)
+    function menuBtnChange() {
+        if (sidebar.classList.contains("open")) {
+            closeBtn.classList.replace("bx-menu", "bx-menu-alt-right"); // Replacing the icons class
+        } else {
+            closeBtn.classList.replace("bx-menu-alt-right", "bx-menu"); // Replacing the icons class
+        }
+    }
+
+    // Set the correct icon when the page loads
+    document.addEventListener("DOMContentLoaded", () => {
+        menuBtnChange();
+    });
+</script>
+  </body>
+  </html>

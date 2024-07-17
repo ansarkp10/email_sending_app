@@ -1,0 +1,234 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draft Emails</title>
+    <link rel="icon" href="{% static 'images/icon.jpg' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+
+/* Basic styling for the form-box */
+.form-box {
+    margin: 20px;
+    max-width: 1000px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 1s ease-in-out;
+}
+
+/* Animation for the form-box */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Styling for the email list */
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+
+
+/* Animation for the list items */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Styling for the links */
+a {
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #16a085;
+}
+
+/* Styling for no-emails message */
+.no-emails {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+
+        .form-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s ease-in-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .badge {
+            background: #1abc9c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        .no-emails {
+            text-align: center;
+            color: #777;
+        }
+        body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: #E4E9F7;
+}
+        /* Search Form Styling */
+.search-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.search-form input[type="text"] {
+    width: 85%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.search-form input[type="text"]:focus {
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    outline: none;
+}
+
+.search-form button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: black;
+    background-color: grey;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-form button:hover {
+    background-color: rgb(176, 173, 173);
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+    </style>
+</head>
+<body style="padding-left: 45px;">
+    <div class="sidebar open">
+        {% include 'menu.html' %}
+    </div>
+    <div>
+      <div class="form-box">
+        <h1>Draft Emails</h1>
+        <ul>
+            {% if drafts %}
+            <form method="GET" action="{% url 'drafts_emails' %}" class="search-form">
+                <input type="text" name="q" placeholder="Search emails..." value="{{ query|default_if_none:'' }}">
+                <button type="submit">Search</button>
+            </form>
+            {% for draft in drafts %}
+            <li style="border-bottom: 1px solid #ddd; padding: 10px 0;" onmouseover="this.style.backgroundColor='#f9f9f9';" onmouseout="this.style.backgroundColor='';">
+                <i class="fas fa-file-alt"></i>
+                <a href="{% url 'email_detail' draft.id %}">
+                    {{ draft.subject }}
+                </a>
+                <i class="fas fa-trash" id="bin-icon" onclick="event.preventDefault(); document.getElementById('bin-form-{{ draft.id }}').submit();" style="float: right; margin-right: 20px;"></i>
+                <form id="bin-form-{{ draft.id }}" action="{% url 'drafts_to_bin' draft.id %}" method="POST" style="display: none;">
+                    {% csrf_token %}
+                </form>
+                <i class="fas fa-times" id="remove-icon" onclick="event.preventDefault(); document.getElementById('remove-form-{{ draft.id }}').submit();" style="float: right; margin-right: 20px;"></i>
+                <form id="remove-form-{{ draft.id }}" action="{% url 'remove_draft' draft.id %}" method="POST" style="display: none;">
+                    {% csrf_token %}
+                </form>
+                <span style="float: right; margin-right: 10px;">
+                    {{ draft.sent_at|date:"F" }} &nbsp;&nbsp; {{ draft.sent_at|date:"d" }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </span>
+                
+            </li>
+            {% endfor %}
+            {% else %}
+            <li class="no-emails">No draft emails found.</li>
+            {% endif %}
+        </ul>
+    </div>
+    
+    
+    
+    
+    
+    
+    </div>
+    <script>
+        let sidebar = document.querySelector(".sidebar");
+        let closeBtn = document.querySelector("#btn");
+        let searchBtn = document.querySelector(".bx-search");
+    
+        closeBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
+            menuBtnChange(); // Calling the function (optional)
+        });
+    
+        searchBtn.addEventListener("click", () => {
+            // Sidebar open when you click on the search icon
+            sidebar.classList.toggle("open");
+            menuBtnChange(); // Calling the function (optional)
+        });
+    
+        // Following are the code to change sidebar button (optional)
+        function menuBtnChange() {
+            if (sidebar.classList.contains("open")) {
+                closeBtn.classList.replace("bx-menu", "bx-menu-alt-right"); // Replacing the icons class
+            } else {
+                closeBtn.classList.replace("bx-menu-alt-right", "bx-menu"); // Replacing the icons class
+            }
+        }
+    
+        // Set the correct icon when the page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            menuBtnChange();
+        });
+    </script>
+</body>
+</html>
